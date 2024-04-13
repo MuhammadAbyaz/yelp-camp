@@ -13,7 +13,9 @@
   </head>
   <body class="d-flex flex-column vh-100">
     <%- include("../partials/navbar") %>
-    <main class="container mt-5"><%- body %></main>
+    <main class="container mt-5">
+      <%- include("../partials/flash") %> <%- body %>
+    </main>
     <%- include("../partials/footer") %>
     <script
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
@@ -25,29 +27,6 @@
       integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
       crossorigin="anonymous"
     ></script>
-    <script>
-      (() => {
-        "use strict";
-
-        // Fetch all the forms we want to apply custom Bootstrap validation styles to
-        const forms = document.querySelectorAll(".validated-form");
-
-        // Loop over them and prevent submission
-        Array.from(forms).forEach((form) => {
-          form.addEventListener(
-            "submit",
-            (event) => {
-              if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-              }
-
-              form.classList.add("was-validated");
-            },
-            false
-          );
-        });
-      })();
-    </script>
+    <script src="/scripts/validate-forms.js"></script>
   </body>
 </html>
