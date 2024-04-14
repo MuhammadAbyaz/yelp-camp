@@ -3,12 +3,16 @@ const mongoose = require("mongoose");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
 const path = require("path");
-const app = express();
+const passport = require("passport");
+const localStrategy = require("passport-local");
 const methodOverride = require("method-override");
 const campgroundRouter = require("./routes/campground");
 const reviewRouter = require("./routes/review");
+const userRouter = require("./routes/user");
+const User = require("./models/user");
 const session = require("express-session");
 const flash = require("connect-flash");
+const app = express();
 
 mongoose.connect("mongodb://127.0.0.1:27017/yelp-camp");
 const db = mongoose.connection;
@@ -35,11 +39,21 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(methodOverride("_method"));
 app.use(flash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   next();
 });
+
+app.use("/", userRouter);
 app.use("/campgrounds", campgroundRouter);
 app.use("/campgrounds/:id/reviews", reviewRouter);
 app.engine("ejs", ejsMate);
