@@ -1,8 +1,13 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const catchAsync = require("../utils/catchAsync");
 const { campgroundController } = require("../controllers/campground");
 const { isLoggedIn, isAuthor, validateCampground } = require("../middleware");
+const multer = require("multer");
+const { storage } = require("../cloudinary");
+const upload = multer({
+  storage,
+});
 
 // Index Page
 router
@@ -14,6 +19,7 @@ router
   )
   .post(
     isLoggedIn,
+    upload.array("images"),
     validateCampground,
     catchAsync(campgroundController.addNewCampground.bind(campgroundController))
   );
@@ -28,9 +34,7 @@ router.get(
   "/:id/edit",
   isLoggedIn,
   isAuthor,
-  catchAsync((req, res) => {
-    res.render("campgrounds/edit");
-  })
+  catchAsync(campgroundController.renderEditForm.bind(campgroundController))
 );
 router
   .route("/:id")
@@ -42,6 +46,7 @@ router
   .put(
     isLoggedIn,
     isAuthor,
+    upload.array("images"),
     validateCampground,
     catchAsync(campgroundController.updateCampground.bind(campgroundController))
   )
