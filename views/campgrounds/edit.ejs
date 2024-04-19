@@ -60,18 +60,6 @@
           multiple
         />
       </div>
-      <!-- <div class="mb-3">
-        <label for="image" class="form-label">Image Url</label>
-        <input
-          class="form-control"
-          type="text"
-          name="image"
-          id="image"
-          value="<%= campground.image %>"
-          required
-        />
-        <div class="valid-feedback">Looks good!</div>
-      </div> -->
       <div class="mb-3">
         <label for="description" class="form-label">Description</label>
         <textarea
@@ -83,6 +71,20 @@
 <%= campground.description %></textarea
         >
         <div class="valid-feedback">Looks good!</div>
+      </div>
+      <div class="mb-3">
+        <% campground.images.forEach(function(img,i){ %>
+        <img src="<%=img.thumbnail%>" alt="" class="img-thumbnail" />
+        <div class="form-check-inline">
+          <input
+            type="checkbox"
+            id="image-<%=i %>"
+            name="deleteImages[]"
+            value="<%= img.filename %>"
+          />
+        </div>
+        <label for="image-<%= i %>">Delete?</label>
+        <% }) %>
       </div>
       <button class="btn btn-info mt-3" type="submit">Update Campground</button>
     </form>

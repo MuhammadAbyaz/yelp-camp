@@ -1,5 +1,8 @@
 const campgroundModel = require("../models/campground");
+const { cloudinary } = require("../cloudinary");
+const geoCodingClient = require("@mapbox/mapbox-sdk/services/geocoding");
 
+const geoCoder = geoCodingClient({ accessToken: process.env.MAP_TOKEN });
 class CampgroundController {
   constructor(campgroundModel) {
     this.campgroundModel = campgroundModel;
@@ -9,13 +12,19 @@ class CampgroundController {
     res.render("campgrounds/index", { campgrounds });
   }
   async addNewCampground(req, res) {
+    const geoData = await geoCoder
+      .forwardGeocode({
+        query: req.body.location,
+        limit: 1,
+      })
+      .send();
     const newCampground = this.campgroundModel(req.body);
+    newCampground.geometry = geoData.body.features[0].geometry;
     newCampground.images = req.files.map((f) => ({
       url: f.path,
       filename: f.filename,
     }));
     newCampground.user = req.user._id;
-    console.log(newCampground);
     await newCampground.save();
     res.redirect(`campgrounds/${newCampground._id}`);
   }
@@ -53,7 +62,16 @@ class CampgroundController {
     }));
     campground.images.push(...imgs);
     await campground.save();
-    res.redirect(`campgrounds/${req.params.id}`, { campground });
+    if (req.body.deleteImages) {
+      for (let filename of req.body.deleteImages) {
+        await cloudinary.uploader.destroy(filename);
+      }
+      await campground.updateOne({
+        $pull: { images: { filename: { $in: req.body.deleteImages } } },
+      });
+    }
+    req.flash("success", "Successfully updated campground");
+    res.redirect(`/campgrounds/${campground._id}`);
   }
   async deleteCampground(req, res) {
     const campground = await this.campgroundModel.findByIdAndDelete(
