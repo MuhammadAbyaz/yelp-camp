@@ -11,6 +11,7 @@
       <img
         src="https://res.cloudinary.com/dstj0sh3r/image/upload/v1713464620/YelpCamp/facqku5weflgo7jqgvks.jpg"
         alt=""
+        crossorigin="anonymous"
       />
       <% } %>
     </div>
@@ -31,5 +32,6 @@
 <%} %>
 <script>
   const mapToken = "<%-process.env.MAP_TOKEN%>";
+  const campgrounds = {features: <%-JSON.stringify(campgrounds)%>}
 </script>
-<script src="/scripts/clusterMap.js"></script>
+<script src="/javascripts/clusterMap.js"></script>
