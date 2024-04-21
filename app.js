@@ -16,6 +16,7 @@ const reviewRouter = require("./routes/review");
 const userRouter = require("./routes/user");
 const User = require("./models/user");
 const session = require("express-session");
+const MongoDbStore = require("connect-mongo")(session);
 const flash = require("connect-flash");
 const app = express();
 
@@ -26,13 +27,23 @@ db.once("open", () => {
   console.log("Database Connected");
 });
 // Setting up middlewares
-
+const secret = process.env.SECRET || "thisshouldbeabettersecret";
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
+const store = new MongoDbStore({
+  url: process.env.DB_URL || "mongodb://127.0.0.1:27017/yelp-camp",
+  secret,
+  touchAfter: 24 * 60 * 60,
+});
+store.on("error", function (e) {
+  console.log("SESSION STORE ERROR", e);
+});
+
 app.use(
   session({
+    store,
     name: "session",
-    secret: "thisshouldbeabettersecret!",
+    secret,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -127,7 +138,8 @@ app.use((err, req, res, next) => {
   res.status(status).render("error", { err });
 });
 
+const port = process.env.PORT || 3000;
 // Starting the server to listen to any request
-app.listen(3000, () => {
-  console.log("LISTENING ON PORT 3000!!");
+app.listen(port, () => {
+  console.log(`Serving on Port ${port}`);
 });
